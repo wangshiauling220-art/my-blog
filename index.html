@@ -1,0 +1,262 @@
+<!doctype html>
+<html lang="zh-Hant-TW">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>老師的文章｜個人網站模板</title>
+  <meta name="description" content="個人文章網站模板，支援標籤、搜尋、深色模式與 Markdown 文章。" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>🪨</text></svg>">
+  <style>
+    :root{
+      --bg: #ffffff; --fg:#111827; --muted:#6b7280; --card:#f3f4f6; --accent:#2563eb; --border:#e5e7eb;
+      --code-bg:#f8fafc; --shadow:0 10px 20px rgba(0,0,0,.06);
+    }
+    @media (prefers-color-scheme: dark){
+      :root{ --bg:#0b0f15; --fg:#e5e7eb; --muted:#9ca3af; --card:#111827; --accent:#60a5fa; --border:#1f2937; --code-bg:#0f172a; --shadow:0 8px 16px rgba(0,0,0,.3);}  
+    }
+    html.dark{ --bg:#0b0f15; --fg:#e5e7eb; --muted:#9ca3af; --card:#111827; --accent:#60a5fa; --border:#1f2937; --code-bg:#0f172a; --shadow:0 8px 16px rgba(0,0,0,.3);} 
+    *{box-sizing:border-box}
+    body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.7 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif}
+    a{color:var(--accent);text-decoration:none}
+    a:hover{text-decoration:underline}
+    header{position:sticky;top:0;z-index:10;background:var(--bg);backdrop-filter:saturate(180%) blur(8px);border-bottom:1px solid var(--border)}
+    .container{max-width:980px;margin:0 auto;padding:20px}
+    .row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+    .brand{font-weight:800;letter-spacing:.3px}
+    .grow{flex:1}
+    .search{position:relative;flex:1;min-width:220px}
+    .search input{width:100%;padding:10px 36px 10px 12px;border:1px solid var(--border);border-radius:12px;background:transparent;color:var(--fg)}
+    .search .icon{position:absolute;right:10px;top:50%;transform:translateY(-50%);color:var(--muted)}
+    .btn{border:1px solid var(--border);background:transparent;color:var(--fg);padding:8px 12px;border-radius:12px;cursor:pointer}
+    .btn:hover{background:var(--card)}
+
+    main{min-height:70vh}
+    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px}
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px;box-shadow:var(--shadow)}
+    .card h3{margin:.2rem 0 .2rem;font-size:1.1rem}
+    .muted{color:var(--muted)}
+    .tags{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+    .tag{padding:4px 10px;border:1px solid var(--border);border-radius:999px;font-size:.85rem;color:var(--muted);cursor:pointer}
+    .tag.active{border-color:var(--accent);color:var(--accent)}
+
+    article{max-width:760px;margin:0 auto}
+    article h1{font-size:2rem;margin:10px 0}
+    .post-meta{color:var(--muted);margin-bottom:18px}
+    article img{max-width:100%;border-radius:12px}
+    article pre{background:var(--code-bg);padding:14px;border-radius:12px;overflow:auto;border:1px solid var(--border)}
+    article code{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
+
+    footer{border-top:1px solid var(--border);padding:24px 0;margin-top:24px;color:var(--muted)}
+
+    .empty{padding:40px;text-align:center;color:var(--muted)}
+    .breadcrumbs{color:var(--muted);margin-bottom:12px}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <div class="row">
+        <div class="brand">🪨 老師的文章</div>
+        <div class="search">
+          <input id="searchInput" placeholder="搜尋文章標題或內容…（Enter 確認）" />
+          <span class="icon">⌘K</span>
+        </div>
+        <button id="themeBtn" class="btn" title="切換明／暗">☀️/🌙</button>
+        <a class="btn" href="#/about">關於</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="container" id="app"></main>
+
+  <footer class="container">
+    <div class="row" style="justify-content:space-between">
+      <div>© <span id="year"></span> 老師｜以 Markdown 撰寫，支援 GitHub Pages</div>
+      <div><a href="#/feed">RSS</a> · <a href="#/now">現在狀態</a></div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script>
+  const posts = [
+    {
+      slug: 'hello-world',
+      title: '開站記：為什麼我要用自己的網站寫作',
+      date: '2025-08-14',
+      tags: ['隨筆','研究日誌'],
+      summary: '用自己的網頁發表文章，掌握版面與歸檔，長期維護學術與教學資源。',
+      content: `# 開站記：為什麼我要用自己的網站寫作
+
+這是第一篇文章。重點：
+
+- **可掌握性**：不被平台演算法綁架。
+- **可引用性**：每篇文章都有固定連結，適合在論文或投影片引用。
+- **可維護性**：Markdown 撰寫，版本控制簡單。
+
+## 之後的規劃
+- 每週整理研究筆記
+- 教學素材與範例程式碼
+- 生活觀察與書摘
+
+> 你可以直接在此檔案內新增文章（見 \`posts\` 陣列），或把文章拆成獨立 \`.md\` 檔案再進階設定載入。祝寫作順利！`
+    },
+    {
+      slug: 'paper-notes',
+      title: '文獻閱讀筆記模板（APA）',
+      date: '2025-08-10',
+      tags: ['研究方法','APA'],
+      summary: '快速記錄一篇論文的核心：研究問題、方法、結果、限制與可用引文。',
+      content: `# 文獻閱讀筆記模板（APA）
+
+**Citation**：作者（年份）。標題。*期刊*，卷(期)，頁碼。https://doi.org/xxxx
+
+**RQ**：
+
+**Methods**：
+
+**Findings**：
+
+**Quotes**：
+> 關鍵引文 1
+
+**Limitations / Next**：`
+    }
+  ];
+
+  const $ = sel => document.querySelector(sel);
+  const app = $('#app');
+  const byDateDesc = (a,b)=> new Date(b.date) - new Date(a.date);
+
+  function fmtDate(iso){
+    const d = new Date(iso + 'T00:00:00');
+    return d.toLocaleDateString('zh-TW', { year:'numeric', month:'short', day:'numeric'});
+  }
+
+  function setTheme(init=false){
+    const saved = localStorage.getItem('theme');
+    const preferDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const dark = saved ? saved === 'dark' : preferDark;
+    document.documentElement.classList.toggle('dark', dark);
+    if(!init) localStorage.setItem('theme', dark ? 'dark':'light');
+    $('#themeBtn').textContent = dark ? '🌙' : '☀️';
+  }
+
+  function renderList({q='', tag=null}={}){
+    const title = `最新文章${tag? ' · ' + tag: ''}${q? ' · 搜尋「'+q+'」':''}`;
+    const filtered = posts
+      .filter(p=> !tag || p.tags.includes(tag))
+      .filter(p=> !q || (p.title+" "+p.summary+" "+p.content).toLowerCase().includes(q.toLowerCase()))
+      .sort(byDateDesc);
+
+    if(filtered.length===0){
+      app.innerHTML = `<div class="empty">找不到符合條件的文章。</div>`; return;
+    }
+
+    const cards = filtered.map(p=>
+      `<div class="card">
+        <div class="muted">${fmtDate(p.date)}</div>
+        <h3><a href="#/post/${p.slug}">${p.title}</a></h3>
+        <div class="muted">${p.summary||''}</div>
+        <div class="tags">${p.tags.map(t=>`<span class="tag" data-tag="${t}">#${t}</span>`).join('')}</div>
+      </div>`).join('');
+
+    app.innerHTML = `
+      <div class="breadcrumbs">首頁 / 文章</div>
+      <h1 style="margin:6px 0 14px">${title}</h1>
+      <div class="grid">${cards}</div>`;
+
+    app.querySelectorAll('.tag').forEach(el=>{
+      el.addEventListener('click', ()=>{ location.hash = `#/tag/${encodeURIComponent(el.dataset.tag)}` })
+    })
+  }
+
+  function renderPost(slug){
+    const p = posts.find(x=> x.slug===slug);
+    if(!p){ app.innerHTML = '<div class="empty">找不到這篇文章。</div>'; return; }
+    const html = marked.parse(p.content);
+    app.innerHTML = `
+      <div class="breadcrumbs"><a href="#/">首頁</a> / 文章</div>
+      <article>
+        <h1>${p.title}</h1>
+        <div class="post-meta">${fmtDate(p.date)} · ${p.tags.map(t=>`<a href=\"#/tag/${encodeURIComponent(t)}\">#${t}</a>`).join(' ')}</div>
+        <div class="post-body">${html}</div>
+        <div style="margin-top:28px"><a class="btn" href="#/">← 返回列表</a></div>
+      </article>`;
+    window.scrollTo({top:0, behavior:'smooth'});
+  }
+
+  function renderAbout(){
+    app.innerHTML = `
+      <article>
+        <h1>關於本站</h1>
+        <p>這是一個極輕量、無後端的個人文章網站模板。使用 <strong>Markdown</strong> 撰寫文章、<strong>前端路由</strong> 呈現、<strong>深色模式</strong> 與 <strong>快速搜尋</strong>。非常適合部署到 GitHub Pages。</p>
+        <h2>如何新增文章？</h2>
+        <ol>
+          <li>在此檔案的 <code>posts</code> 陣列裡，依範例新增一筆物件：<code>{ slug, title, date, tags, summary, content }</code>。</li>
+          <li><code>content</code> 可用 Markdown 編寫（支援標題、粗體、程式碼區塊等）。</li>
+          <li>存檔後重新整理即可看到新文章。</li>
+        </ol>
+        <p>想把文章拆成獨立 <code>.md</code> 檔案？可以，後續我會提供外掛載入器程式碼。</p>
+      </article>`;
+  }
+
+  function renderFeed(){
+    const site = location.origin + location.pathname;
+    const items = posts.sort(byDateDesc).map(p=>
+      `<item><title><![CDATA[${p.title}]]></title><link>${site}#/post/${p.slug}</link><pubDate>${new Date(p.date).toUTCString()}</pubDate><description><![CDATA[${p.summary||''}]]></description></item>`
+    ).join('\n');
+    const xml = `<?xml version="1.0" encoding="UTF-8"?>\n<rss version="2.0"><channel><title>老師的文章</title><link>${site}</link><description>個人文章 RSS</description>${items}</channel></rss>`;
+    app.innerHTML = `
+      <article>
+        <h1>RSS Feed</h1>
+        <p>複製下方內容保存為 <code>rss.xml</code> 後，可提供 RSS 訂閱。</p>
+        <pre><code>${xml.replace(/</g,'&lt;')}</code></pre>
+      </article>`;
+  }
+
+  function renderNow(){
+    app.innerHTML = `
+      <article>
+        <h1>Now / 現在在做什麼</h1>
+        <p class="muted">（這是可選頁面，用來簡述你當前的研究與生活重點。）</p>
+        <ul>
+          <li>博士論文第二階段問卷設計調整</li>
+          <li>每週整理 2 篇文獻筆記</li>
+          <li>準備 10 月計畫口試簡報</li>
+        </ul>
+      </article>`
+  }
+
+  function router(){
+    const hash = decodeURIComponent(location.hash || '#/');
+    const [_, route, param] = hash.split('/');
+    if(route==='') return renderList();
+    if(route==='post') return renderPost(param);
+    if(route==='tag') return renderList({tag:param});
+    if(route==='search') return renderList({q:param});
+    if(route==='about') return renderAbout();
+    if(route==='feed') return renderFeed();
+    if(route==='now') return renderNow();
+    return renderList();
+  }
+
+  window.addEventListener('hashchange', router);
+  document.addEventListener('DOMContentLoaded', ()=>{
+    const preferDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    document.documentElement.classList.toggle('dark', preferDark);
+    router();
+    document.getElementById('year').textContent = new Date().getFullYear();
+    document.getElementById('themeBtn').addEventListener('click', ()=>{ 
+      document.documentElement.classList.toggle('dark'); 
+    });
+    const input = document.getElementById('searchInput');
+    input.addEventListener('keydown', e=>{
+      if(e.key==='Enter') location.hash = `#/search/${encodeURIComponent(input.value.trim())}`;
+    });
+    window.addEventListener('keydown', (e)=>{
+      if((e.metaKey||e.ctrlKey) && e.key.toLowerCase()==='k'){ e.preventDefault(); input.focus(); }
+    });
+  });
+  </script>
+</body>
+</html>
